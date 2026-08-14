@@ -15,7 +15,6 @@ ignore:
     - "VersioningConfiguration.MFADelete"
     # This subfield struct has no members...
     - "NotificationConfiguration.EventBridgeConfiguration"
-    - LoggingEnabled.TargetObjectKeyFormat
     - CreateBucketConfiguration.Tags
     # Redundant with ObjectLockEnabledForBucket on CreateBucket
     - "ObjectLockConfiguration.ObjectLockEnabled"
