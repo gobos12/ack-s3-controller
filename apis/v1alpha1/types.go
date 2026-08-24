@@ -17,14 +17,12 @@ package v1alpha1
 
 import (
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
-	"github.com/aws/aws-sdk-go/aws"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Hack to avoid import errors during build...
 var (
 	_ = &metav1.Time{}
-	_ = &aws.JSONValue{}
 	_ = ackv1alpha1.AWSAccountID("")
 )
 
@@ -559,7 +557,10 @@ type LocationInfo struct {
 type LoggingEnabled struct {
 	TargetBucket *string        `json:"targetBucket,omitempty"`
 	TargetGrants []*TargetGrant `json:"targetGrants,omitempty"`
-	TargetPrefix *string        `json:"targetPrefix,omitempty"`
+	// Amazon S3 key format for log objects. Only one format, PartitionedPrefix
+	// or SimplePrefix, is allowed.
+	TargetObjectKeyFormat *TargetObjectKeyFormat `json:"targetObjectKeyFormat,omitempty"`
+	TargetPrefix          *string                `json:"targetPrefix,omitempty"`
 }
 
 // A container specifying replication metrics-related settings enabling replication
@@ -750,6 +751,16 @@ type OwnershipControlsRule struct {
 	// This functionality is not supported for directory buckets. Directory buckets
 	// use the bucket owner enforced setting for S3 Object Ownership.
 	ObjectOwnership *string `json:"objectOwnership,omitempty"`
+}
+
+// Amazon S3 keys for log objects are partitioned in the following format:
+//
+// [DestinationPrefix][SourceAccountId]/[SourceRegion]/[SourceBucket]/[YYYY]/[MM]/[DD]/[YYYY]-[MM]-[DD]-[hh]-[mm]-[ss]-[UniqueString]
+//
+// PartitionedPrefix defaults to EventTime delivery when server access logs
+// are delivered.
+type PartitionedPrefix struct {
+	PartitionDateSource *string `json:"partitionDateSource,omitempty"`
 }
 
 // The PublicAccessBlock configuration that you want to apply to this Amazon
@@ -1079,6 +1090,18 @@ type TargetGrant struct {
 	// Container for the person being granted permissions.
 	Grantee    *Grantee `json:"grantee,omitempty"`
 	Permission *string  `json:"permission,omitempty"`
+}
+
+// Amazon S3 key format for log objects. Only one format, PartitionedPrefix
+// or SimplePrefix, is allowed.
+type TargetObjectKeyFormat struct {
+	// Amazon S3 keys for log objects are partitioned in the following format:
+	//
+	// [DestinationPrefix][SourceAccountId]/[SourceRegion]/[SourceBucket]/[YYYY]/[MM]/[DD]/[YYYY]-[MM]-[DD]-[hh]-[mm]-[ss]-[UniqueString]
+	//
+	// PartitionedPrefix defaults to EventTime delivery when server access logs
+	// are delivered.
+	PartitionedPrefix *PartitionedPrefix `json:"partitionedPrefix,omitempty"`
 }
 
 // The S3 Intelligent-Tiering storage class is designed to optimize storage
